@@ -12,35 +12,48 @@
 
 #include "minitalk.h"
 
-void	signal_handler(int signal)
+void	signal_handler(int signal, siginfo_t *siginfo, void *context)
 {
-	static unsigned char	c;
-	static int				bit;
+	static int	res = 0;
+	static int	pow = 128;
+	static char	*str;
+	(void)		context;
 
-	c |= (signal == SIGUSR1);
-	bit++;
-	if (bit == 8)
+	if (signal == SIGUSR1)
+		res += pow;
+	pow /= 2;
+	if (pow == 0)
 	{
-		ft_printf("%c", c);
-		c = 0;
-		bit = 0;
+		if (res == 0)
+		{
+			ft_printf("Signal received from : %d.\n", siginfo->si_pid);
+			ft_printf("Message : %s\n", str);
+			free(str);
+			str = NULL;
+			kill(siginfo->si_pid, SIGUSR1);
+		}
+		else
+			str = str_add_char(str, res);
+		res = 0;
+		pow = 128;
 	}
-	else
-		c <<= 1;
+	if (kill(siginfo->si_pid, SIGUSR2) == -1)
+		error_handler(3);
 }
 
 int	main(void)
 {
-	int	pid;
+	struct sigaction	sa;
 
-	pid = (int)getpid();
-	ft_printf("PID: %d\n", pid);
+	sigemptyset(&sa.sa_mask);
+	sigaddset(&sa.sa_mask, SIGUSR1);
+	sa.sa_sigaction = signal_handler;
+	sa.sa_flags = SA_SIGINFO;
+	ft_printf("PID: %d\n", (int)getpid());
 	ft_printf("Waiting for a signal...\n");
+	if (sigaction(SIGUSR1, &sa, NULL) == -1 || sigaction(SIGUSR2, &sa, NULL) == -1)
+		error_handler(2);
 	while (1)
-	{
-		signal(SIGUSR1, signal_handler);
-		signal(SIGUSR2, signal_handler);
 		pause();
-	}
 	return (0);
 }

@@ -17,4 +17,8 @@
 # include "../libft/include/libft.h"
 # include <signal.h>
 
+char    *str_add_char(char *s1, char c);
+void    error_handler(int status);
+int     is_str_digit(char *str);
+
 #endif

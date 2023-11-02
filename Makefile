@@ -1,7 +1,5 @@
 NAME          = server
 NAMECL        = client
-NAMEB         = server_bonus
-NAMEBCL       = client_bonus
 INCLUDES      = include/
 HEADER        = -I $(INCLUDES)
 SRC_DIR       = src/
@@ -13,23 +11,14 @@ LIBFT_LIB     = $(LIBFT_DIR)libft.a
 CC            = gcc
 CFLAGS        = -Wall -Wextra -Werror
 
-SRC_FILES     = server
-SRCCL_FILES   = client
-
-SRCB_FILES    = server_bonus
-SRCBCL_FILES  = client_bonus
+SRC_FILES     = server utils
+SRCCL_FILES   = client utils
 
 SRC           = $(addprefix $(SRC_DIR), $(addsuffix .c, $(SRC_FILES)))
 OBJ           = $(addprefix $(OBJ_DIR), $(addsuffix .o, $(SRC_FILES)))
 
 SRCCL         = $(addprefix $(SRC_DIR), $(addsuffix .c, $(SRCCL_FILES)))
 OBJCL         = $(addprefix $(OBJ_DIR), $(addsuffix .o, $(SRCCL_FILES)))
-
-SRCB          = $(addprefix $(SRC_DIR), $(addsuffix .c, $(SRCB_FILES)))
-OBJB          = $(addprefix $(SRC_DIR), $(addsuffix .o, $(SRCB_FILES)))
-
-SRCBCL        = $(addprefix $(SRC_DIR), $(addsuffix .c, $(SRCBCL_FILES)))
-OBJBCL        = $(addprefix $(SRC_DIR), $(addsuffix .o, $(SRCBCL_FILES)))
 
 OBJ_CACHE     = .cache_exists
 
@@ -55,16 +44,6 @@ $(OBJ_DIR)%.o : $(SRC_DIR)%.c | $(OBJ_CACHE)
 
 $(OBJ_CACHE):
 					@mkdir -p $(OBJ_DIR)
-
-bonus:			$(LIBFT_LIB) allbonus
-
-allbonus:		$(NAMEB) $(NAMEBCL)
-
-$(NAMEB):		$(OBJB)
-					$(CC) $(CFLAGS) $(OBJB) $(LIBFT_LIB) -o $(NAMEB)
-
-$(NAMEBCL):     $(OBJBCL)
-					$(CC) $(CFLAGS) $(OBJBCL) $(LIBFT_LIB) -o $(NAMEBCL)
 
 clean:
 					@rm -rf $(OBJ_DIR)

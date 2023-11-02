@@ -12,43 +12,73 @@
 
 #include "minitalk.h"
 
-void	ft_send_bits(int pid, char i)
+void    char_to_bin(char c, int pid)
 {
-	int	bit;
+	int i;
 
-	bit = 0;
-	while (bit < 8)
+	i = 128;
+	while (i >= 1)
 	{
-		if ((i & (0x01 << bit)) != 0)
-			kill(pid, SIGUSR1);
+		if (i & c)
+		{
+			if (kill(pid, SIGUSR1) == -1)
+				error_handler(3);
+		}
 		else
-			kill(pid, SIGUSR2);
+		{
+			if (kill(pid, SIGUSR2) == -1)
+				error_handler(3);
+		}
+		i /= 2;
 		usleep(100);
-		bit++;
 	}
+}
+
+void    str_to_bin(char *str, int pid)
+{
+	int	i;
+
+	i = 0;
+	while (str[i])
+	{
+		char_to_bin(str[i], pid);
+		i++;
+	}
+	char_to_bin('\0', pid);
+}
+
+void	handle_server_signal(int signum, siginfo_t *siginfo, void *context)
+{
+	(void)	siginfo;
+	(void)	context;
+	if (signum == SIGUSR1)
+		printf("Signal received successfully.\n");
 }
 
 int	main(int argc, char **argv)
 {
-	int	pid;
-	int	i;
+	struct sigaction	sa;
+	int					pid;
 
-	i = 0;
-	if (argc == 3)
-	{
-		pid = ft_atoi(argv[1]);
-		while (argv[2][i] != '\0')
-		{
-			ft_send_bits(pid, argv[2][i]);
-			i++;
-		}
-		ft_send_bits(pid, '\n');
-	}
-	else
+	if (argc != 3)
 	{
 		ft_printf("Error: wrong format.\n");
 		ft_printf("Try: ./client <PID> <MESSAGE>\n");
-		return (1);
+		return (0);
 	}
+	sigemptyset(&sa.sa_mask);
+	sigaddset(&sa.sa_mask, SIGUSR1);
+	sa.sa_sigaction = handle_server_signal;
+	sa.sa_flags = SA_SIGINFO;
+	pid = ft_atoi(argv[1]);
+	if (sigaction(SIGUSR1, &sa, NULL) == -1 || sigaction(SIGUSR2, &sa, NULL) == -1)
+		error_handler(2);
+	if (!is_str_digit(argv[1]) || pid < 0)
+	{
+		ft_printf("pid = %d\n", pid);
+		error_handler(1);
+	}
+	ft_printf("Trying to send a signal to : %d\n", pid);
+	str_to_bin(argv[2], pid);
 	return (0);
 }
