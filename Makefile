@@ -40,7 +40,7 @@ $(NAMECL):		$(OBJCL)
 
 $(OBJ_DIR)%.o : $(SRC_DIR)%.c | $(OBJ_CACHE)
 					@echo "Compiling $<"
-					@$(CC) $(CC_FLAGS) $(HEADER) -c $< -o $@
+					@$(CC) $(CFLAGS) $(HEADER) -c $< -o $@
 
 $(OBJ_CACHE):
 					@mkdir -p $(OBJ_DIR)
